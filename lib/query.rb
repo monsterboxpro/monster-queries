@@ -1,3 +1,4 @@
+require 'handlebars'
 class Q
   @template_cache = {}
   @exists_cache = {}
