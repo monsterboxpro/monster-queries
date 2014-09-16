@@ -2,7 +2,7 @@ require 'handlebars'
 class Q
   @template_cache = {}
   @exists_cache = {}
-  SKIP_CACHE = (Rails.env == 'development')
+  SKIP_CACHE = true
 
   def self.method_missing name
     QueryBuilder.new name
@@ -16,17 +16,29 @@ class Q
 
   def self.handlebars
     unless @handlebars
-      @handlebars = Handlebars::Context.new
-      @handlebars.register_helper(:include) do |context,name,options|
+      include_helper = ->(context,name,options) {
         variables = {}
         context.each do |k,v|
           variables[k] = v
         end
         options['hash'].each do |k,v|
           variables[k] = v
-        end
+        end if options
         parts = name.split('.')
         QueryBuilder.with_scope(parts).to_s variables
+      }
+      @handlebars = Handlebars::Context.new
+      @handlebars.register_helper(:include,&include_helper)
+      @handlebars.register_helper(:paginate) do |context,value,options|
+        count = context.detect{|k,v| k == 'count'}
+        if !count.nil? && count[1] == true
+          include_helper.call(context,'pagination.select',options)
+        else
+          include_helper.call(context,value,options)
+        end
+      end
+      @handlebars.register_helper(:paginate_offset) do |context,value,options|
+        include_helper.call(context,'pagination.offset',options)
       end
       @handlebars.register_helper(:wildcard) do |context,value,options|
         ActiveRecord::Base.connection.quote "%#{value}%"
@@ -44,19 +56,30 @@ class Q
     @handlebars
   end
 
-  def self.template file_name
-    if !@template_cache[file_name] || SKIP_CACHE
-      data = File.read file_name
-      @template_cache[file_name] = Q.handlebars.compile(data, noEscape: true)
+  def self.locate_file scope
+    search_paths = [Rails.root,MonsterQueries::Engine.root]
+    search_paths.each do |path|
+      file = path.join('app','queries',*scope.compact.map(&:to_s)).to_s + '.sql'
+      return file if File.exists?(file)
     end
-    @template_cache[file_name]
+    return false
   end
 
-  def self.exists? file_name
-    if !@exists_cache[file_name] || SKIP_CACHE
-      @exists_cache[file_name] = File.file?(file_name)
+  def self.template scope
+    if !@template_cache[scope.join('.')] || SKIP_CACHE
+      file_name = locate_file(scope)
+      data = File.read file_name
+      @template_cache[scope.join('.')] = Q.handlebars.compile(data, noEscape: true)
     end
-    @exists_cache[file_name]
+    @template_cache[scope.join('.')]
+  end
+
+  def self.exists? scope
+    if !@exists_cache[scope] || SKIP_CACHE
+      file_name = locate_file(scope)
+      @exists_cache[scope] = file_name && File.file?(file_name)
+    end
+    @exists_cache[scope]
   end
 end
 
@@ -76,15 +99,17 @@ class QueryBuilder
 
   def method_missing name, args={}
     @scope << name
-    @file_name = nil
     file_exists? ? file_contents(args) : self
   end
 
   def to_s args={}
     if file_exists?
+      ::Rails.logger.tagged('MONSTER QUERY') do
+        ::Rails.logger.info {"Rendered #{@scope.join('.')}"}
+      end
       file_contents args
     else
-      raise "Query doesn't exist: #{@scope.join('/')}"
+      raise "Query doesn't exist: #{@scope.join('.')}"
     end
   end
 
@@ -96,26 +121,11 @@ class QueryBuilder
   private
 
   def file_exists?
-    Q.exists? file_name
-  end
-
-  def file_name
-    unless @file_name
-      scope = @scope[0...-1]
-      scope << @scope.last.to_s + ".sql"
-      @file_name = Rails.root.join('app','queries',*scope.compact.map(&:to_s))
-    end
-    @file_name
+    Q.exists? @scope
   end
 
   def file_contents variables
-    if @paginate
-      template = Q.template(Rails.root.join('app','queries','shared','paginate.sql'))
-      variables[:template_name] = @scope.compact.join('.')
-      variables[:per_page] = 20
-    else
-      template = Q.template(file_name)
-    end
+    template = Q.template(@scope)
     result = template.call variables
     result
   end
@@ -130,6 +140,14 @@ module ARQueryExtension
 
   def select_value query
     self.class.connection.select_value query
+  end
+
+  def select_json query, count
+    if count
+      select_object query
+    else
+      select_array query
+    end
   end
 
   def select_array query
@@ -151,6 +169,14 @@ module ARQueryExtension
 
     def select_value query
       connection.select_value query
+    end
+
+    def select_json query, count
+      if count
+        select_object query
+      else
+        select_array query
+      end
     end
 
     def select_array query
