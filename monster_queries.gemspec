@@ -18,8 +18,8 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", "~> 4.1.5"
-  s.add_dependency 'handlebars', '= 0.6.0'
-  s.add_dependency 'libv8', '= 3.16.14'
+  s.add_dependency 'handlebars'
+  s.add_dependency 'libv8'
 
   s.add_development_dependency "sqlite3"
 end
