@@ -35,7 +35,7 @@ module MonsterQueries
     end
 
     def index_params
-      params.permit :page
+      params.permit :page, :search
     end
   end
 end
