@@ -41,7 +41,7 @@ class Q
         include_helper.call(context,'pagination.offset',options)
       end
       @handlebars.register_helper(:wildcard) do |context,value,options|
-        ActiveRecord::Base.connection.quote "%#{value}%"
+        ActiveRecord::Base.connection.quote "%#{value.gsub('\\','\\\\\\')}%"
       end
       @handlebars.register_helper(:quote) do |context,value,options|
         ActiveRecord::Base.connection.quote value
