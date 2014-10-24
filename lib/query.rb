@@ -151,16 +151,26 @@ module ARQueryExtension
   end
 
   def select_array query
-    select_value(query) || '[]'
+    sql = <<-SQL
+      SELECT COALESCE(array_to_json(array_agg(row_to_json(query_row))), '[]'::json)
+      FROM (#{query}) query_row
+    SQL
+    select_value sql
   end
 
   def select_object query
-    select_value(query) || '{}'
+    sql = <<-SQL
+      SELECT COALESCE(row_to_json(query_row),'{}'::json)
+      FROM (#{query}) query_row
+    SQL
+    select_value sql
   end
+
 
   def select_all query
     self.class.connection.select_all query
   end
+
 
   module ClassMethods
     def execute query
@@ -180,11 +190,19 @@ module ARQueryExtension
     end
 
     def select_array query
-      select_value(query) || '[]'
+      sql = <<-SQL
+        SELECT COALESCE(array_to_json(array_agg(row_to_json(query_row))), '[]'::json)
+        FROM (#{query}) query_row
+      SQL
+      select_value sql
     end
 
     def select_object query
-      select_value(query) || '{}'
+      sql = <<-SQL
+        SELECT COALESCE(row_to_json(query_row),'{}'::json)
+        FROM (#{query}) query_row
+      SQL
+      select_value sql
     end
   end
 end
