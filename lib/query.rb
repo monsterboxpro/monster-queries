@@ -52,6 +52,28 @@ class Q
       @handlebars.register_helper(:float) do |context,value,options|
         value.to_f
       end
+      @handlebars.register_helper(:array) do |context,block,options|
+        if block.is_a?(String)
+          content = "\n" + include_helper.call(context,block,options)
+        else
+          content = block.fn(context)
+        end
+        r = "(SELECT COALESCE(array_to_json(array_agg(row_to_json(array_row))),'[]'::json) FROM ("
+        r << content
+        r << ") array_row)"
+        r
+      end
+      @handlebars.register_helper(:object) do |context,block|
+        if block.is_a?(String)
+          content = "\n" + include_helper.call(context,block,options)
+        else
+          content = block.fn(context)
+        end
+        r = "(SELECT COALESCE(row_to_json(object_row),'{}'::json) FROM ("
+        r << content
+        r << ") object_row)"
+        r
+      end
     end
     @handlebars
   end
