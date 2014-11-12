@@ -63,7 +63,7 @@ class Q
         r << ") array_row)"
         r
       end
-      @handlebars.register_helper(:object) do |context,block|
+      @handlebars.register_helper(:object) do |context,block,options|
         if block.is_a?(String)
           content = "\n" + include_helper.call(context,block,options)
         else
