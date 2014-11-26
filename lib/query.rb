@@ -44,7 +44,11 @@ class Q
         ActiveRecord::Base.connection.quote "%#{value.gsub('\\','\\\\\\')}%"
       end
       @handlebars.register_helper(:quote) do |context,value,options|
-        ActiveRecord::Base.connection.quote value
+        if value.is_a?(V8::Array)
+          value.collect{|v| ActiveRecord::Base.connection.quote v}.join(',')
+        else
+          ActiveRecord::Base.connection.quote value
+        end
       end
       @handlebars.register_helper(:int) do |context,value,options|
         value.to_i
