@@ -25,6 +25,10 @@ module MonsterQueries
 
     def render_paginated target, method, *args
       attrs = args.extract_options!
+      if attrs.key?(:sort)
+        name,dir = attrs[:sort].split ','
+        attrs[:sort] = "#{name} #{dir.upcase}"
+      end
       attrs[:count] = true
       args << attrs
       count_json = target.send(method, *args)
@@ -35,7 +39,7 @@ module MonsterQueries
     end
 
     def index_params
-      params.permit :page, :search
+      params.permit :page, :search, :sort
     end
   end
 end

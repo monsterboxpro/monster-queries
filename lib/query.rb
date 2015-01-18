@@ -30,11 +30,15 @@ class Q
       @handlebars = Handlebars::Context.new
       @handlebars.register_helper(:include,&include_helper)
       @handlebars.register_helper(:paginate) do |context,value,options|
-        count = context.detect{|k,v| k == 'count'}
-        if !count.nil? && count[1] == true
-          include_helper.call(context,'pagination.select',options)
+        if value.is_a?(String)
+          count = context.detect{|k,v| k == 'count'}
+          if !count.nil? && count[1] == true
+            include_helper.call(context,'pagination.select',options)
+          else
+            include_helper.call(context,value,options)
+          end
         else
-          include_helper.call(context,value,options)
+          content = value.fn(context)
         end
       end
       @handlebars.register_helper(:paginate_offset) do |context,value,options|
