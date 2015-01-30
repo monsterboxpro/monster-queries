@@ -172,6 +172,10 @@ module ARQueryExtension
     self.class.connection.select_value query
   end
 
+  def select_values query
+    self.class.connection.select_values query
+  end
+
   def select_json query, count
     if count
       select_object query
@@ -209,6 +213,10 @@ module ARQueryExtension
 
     def select_value query
       connection.select_value query
+    end
+
+    def select_values query
+      self.class.connection.select_values query
     end
 
     def select_json query, count
