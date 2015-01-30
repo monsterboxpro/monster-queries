@@ -216,7 +216,7 @@ module ARQueryExtension
     end
 
     def select_values query
-      self.class.connection.select_values query
+      connection.select_values query
     end
 
     def select_json query, count
