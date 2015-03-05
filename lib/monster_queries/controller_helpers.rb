@@ -27,7 +27,10 @@ module MonsterQueries
       attrs = args.extract_options!
       if attrs.key?(:sort)
         name,dir = attrs[:sort].split ','
-        attrs[:sort] = "#{name} #{dir.upcase}"
+        v = [name]
+        v.push dir.upcase if dir
+        v = v.join ' '
+        attrs[:sort] = v
       end
       attrs[:count] = true
       args << attrs
