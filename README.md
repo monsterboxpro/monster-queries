@@ -31,7 +31,6 @@ You can get sql using the Q module and chaining the path to the file:
 Q.admin.tasks.index project_id: id
 ```
 ->
-                     
 ```sql
 app/queries/projects/tasks/index.sql
 ```
@@ -41,7 +40,7 @@ You can pass params to the query which can be then accessed
 in the queries using {{}}
 ```ruby
 Q.admin.tasks.index project_id: self.id, count: 5
-```                        
+```
 ```sql
 SELECT
   tasks.name,

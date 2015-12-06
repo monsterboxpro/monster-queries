@@ -37,7 +37,11 @@ module MonsterQueries
       count_json = target.send(method, *args)
       set_pagination_headers count_json
       args.last.delete(:count)
-      json = target.send(method, *args)
+      target.send(method, *args)
+    end
+
+    def render_paginated target, method, *args
+      json = render_paginated target, method, *args
       render json: json
     end
 
