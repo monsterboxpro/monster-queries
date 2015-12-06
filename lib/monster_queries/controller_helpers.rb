@@ -23,7 +23,7 @@ module MonsterQueries
       }.to_json
     end
 
-    def render_paginated target, method, *args
+    def render_paginated_json target, method, *args
       attrs = args.extract_options!
       if attrs.key?(:sort)
         name,dir = attrs[:sort].split ','
@@ -40,7 +40,7 @@ module MonsterQueries
       target.send(method, *args)
     end
 
-    def render_paginated target, method, *args
+    def render_paginated_json target, method, *args
       json = render_paginated target, method, *args
       render json: json
     end
