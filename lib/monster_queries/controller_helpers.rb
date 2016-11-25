@@ -23,8 +23,7 @@ module MonsterQueries
       }.to_json
     end
 
-    def render_paginated target, method, *args
-      attrs = args.extract_options!
+    def render_paginated target, method, attrs
       if attrs.key?(:sort)
         name,dir = attrs[:sort].split ','
         v = [name]
@@ -33,15 +32,14 @@ module MonsterQueries
         attrs[:sort] = v
       end
       attrs[:count] = true
-      args << attrs
-      count_json = target.send(method, *args)
+      count_json = target.send method,attrs
       set_pagination_headers count_json
-      args.last.delete(:count)
-      target.send(method, *args)
+      attrs.delete(:count)
+      target.send method, attrs
     end
 
-    def render_paginated_json target, method, *args
-      json = render_paginated target, method, *args
+    def render_paginated_json target, method, attrs
+      json = erender_paginated target, method, attrs
       render json: json
     end
 
