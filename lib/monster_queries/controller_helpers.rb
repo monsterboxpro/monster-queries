@@ -39,7 +39,7 @@ module MonsterQueries
     end
 
     def render_paginated_json target, method, attrs
-      json = erender_paginated target, method, attrs
+      json = render_paginated target, method, attrs
       render json: json
     end
 
