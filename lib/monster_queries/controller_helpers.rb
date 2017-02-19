@@ -23,6 +23,8 @@ module MonsterQueries
       }.to_json
     end
 
+    # AB - We should phase out {{sort}} in favour
+    # of {{order}} {{by}} for more finetune control
     def render_paginated target, method, attrs
       if attrs.key?(:sort)
         name,dir = attrs[:sort].split ','
@@ -30,6 +32,8 @@ module MonsterQueries
         v.push dir.upcase if dir
         v = v.join ' '
         attrs[:sort] = v
+        attrs[:order] = name
+        attrs[:by]    = (dir || 'ASC').upcase
       end
       attrs[:count] = true
       count_json = target.send method,attrs
