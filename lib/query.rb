@@ -165,15 +165,31 @@ module ARQueryExtension
   extend ActiveSupport::Concern
 
   def execute query
-    self.class.connection.execute query
+    begin
+      self.class.connection.execute query
+    rescue
+      File.open(Rails.root.join('tmp','failed.sql'), 'w') { |file| file.write(query) }
+      Rails.root.join
+      raise
+    end
   end
 
   def select_value query
-    self.class.connection.select_value query
+    begin
+      self.class.connection.select_value query
+    rescue
+      File.open(Rails.root.join('tmp','failed.sql'), 'w') { |file| file.write(query) }
+      raise
+    end
   end
 
   def select_values query
-    self.class.connection.select_values query
+    begin
+      self.class.connection.select_values query
+    rescue
+      File.open(Rails.root.join('tmp','failed.sql'), 'w') { |file| file.write(query) }
+      raise
+    end
   end
 
   def select_json query, count
