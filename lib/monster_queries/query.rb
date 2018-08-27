@@ -120,7 +120,7 @@ module MonsterQueries
       <<-HEREDOC
 (SELECT COALESCE(array_to_json(array_agg(row_to_json(array_row))),'[]'::json) FROM (
 #{content}
-array_row)
+) array_row)
       HEREDOC
     end
 
