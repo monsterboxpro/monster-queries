@@ -1,5 +1,6 @@
+require "monster_queries/builder"
+require "monster_queries/query"
+require "monster_queries/active_record"
+require "monster_queries/action_controller"
 require "monster_queries/engine"
-require "monster_queries/controller_helpers"
-
-module MonsterQueries
-end
+module MonsterQueries; end

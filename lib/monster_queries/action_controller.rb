@@ -1,5 +1,5 @@
 module MonsterQueries
-  module Helpers
+  module ActionController
     def set_pagination_headers count_json
       json = JSON.parse(count_json)
       json = json.first if json.is_a?(Array)
