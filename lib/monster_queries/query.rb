@@ -11,6 +11,12 @@ module MonsterQueries
       MonsterQueries::Builder.with_scope(parts).to_s vars
     end
 
+    def self.template_from_string string, vars
+      template = handlebars.compile string, noEscape: true
+      result   = template.call vars
+      result
+    end
+
     # Method Missing is used to create a chain path
     # to the query eg. Q.admin.users.index
     def self.method_missing name
