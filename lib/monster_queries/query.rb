@@ -84,16 +84,16 @@ module MonsterQueries
 
     def self.helper_paginate context, value, options
       if value.is_a?(String)
-        count = context.detect{|k,v| k == 'count'}
-        name = !count.nil? && count[1] == true ? 'pagination.select' : value
-        helper_include.call context, name, options
+        count = !!context["count"]
+        name = count ? 'pagination.select' : value
+        self.helper_include context, name, options
       else
         value.fn context
       end
     end
 
     def self.helper_paginate_offset context, value, options
-      helper_include.call context, 'pagination.offset', options
+      self.helper_include context, 'pagination.offset', options
     end
 
     def self.helper_wildcard context, value, options
