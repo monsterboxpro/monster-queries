@@ -37,7 +37,7 @@ module MonsterQueries
     private
 
     def file_exists?
-      Q.exists? @scope
+      MonsterQueries::Query.exists? @scope
     end
 
     def file_contents variables
