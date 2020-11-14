@@ -34,7 +34,8 @@ module MonsterQueries
     end
 
     def self.locate_file scope
-      search_paths = [Rails.root,MonsterQueries::Engine.root, MonsterQueries::Query.root]
+      search_paths = [Rails.root,MonsterQueries::Engine.root]
+      search_paths.push(MonsterQueries::Query.root) if MonsterQueries::Query.root
       search_paths.each do |path|
         file = path.join('app','queries',*scope.compact.map(&:to_s)).to_s + '.sql'
         return file if File.exists?(file)
